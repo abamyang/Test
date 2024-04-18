@@ -16,10 +16,8 @@
     </div>
 </body>
 
-
 <script type="text/javascript">
-
-
+/*以下代码是对网上方案的改写，便于更直观了解其中的观察者模式*/
 function defineReactive(obj,key,val){
     var depx=new Dep();
     
@@ -37,15 +35,17 @@ function defineReactive(obj,key,val){
     })
 }
 
+ /*observe 劫持set赋予监听的功能*/
 function observe (obj,vm){
     for(let key of Object.keys(obj)){
         defineReactive(vm,key,obj[key]);
     }
 }
 
-
+/*Watcher 观擦者列表，每个属性对应相应的节点数组*/
 var WatcherList={};
 
+ /*  通知所有节点观察者进行update */
 WatcherList.notice=function(key,newvalue){
     var nodeList= WatcherList[key];
     for(let i=0;i<nodeList.length;i++){
@@ -93,8 +93,6 @@ function compile(node,vm){
     }
 }
 
-
-
 function nodeToFragment(node,vm){
     var fragment=document.createDocumentFragment();
     var child;
@@ -117,14 +115,11 @@ function Vue(options){
     document.getElementById(id).appendChild(dom);
 }
 
-
 var vm=new Vue({
     el:'app',
     data:{
         text:'hello world'
     }
 });
-
-
 </script>
 
