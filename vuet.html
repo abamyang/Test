@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+ 
+<body>
+    <div id="app">
+        <input type="text" v-model="text">
+        {{text}}
+        <div></div>
+        {{text}}
+        
+    </div>
+</body>
+
+
+<script type="text/javascript">
+
+
+function defineReactive(obj,key,val){
+    var depx=new Dep();
+    
+    Object.defineProperty(obj,key,{
+        get:function(){
+            return val;
+        },
+        set:function(newval){
+            if(newval===val){
+                return
+            }
+            val=newval;
+            WatcherList.notice(key,newval);
+        }
+    })
+}
+
+function observe (obj,vm){
+    for(let key of Object.keys(obj)){
+        defineReactive(vm,key,obj[key]);
+    }
+}
+
+
+var WatcherList={};
+
+WatcherList.notice=function(key,newvalue){
+    var nodeList= WatcherList[key];
+    for(let i=0;i<nodeList.length;i++){
+        node=nodeList[i];
+        node.nodeValue=newvalue;
+    }     
+}
+
+/*compile 将节点和数据属性对应上*/
+function compile(node,vm){
+    
+    if(node.nodeType==1){
+        var attr=node.attributes;
+        
+        for(let i=0;i<attr.length;i++){
+            if(attr[i].nodeName=='v-model'){
+                var name=attr[i].nodeValue;
+
+                node.addEventListener('input',function(e){
+                    vm[name]=e.target.value;
+                });
+            
+                node.value=vm[name];
+                node.removeAttribute('v-model');
+            }
+        }
+    }
+
+    var reg=/\{\{(.*)\}\}/;
+    if(node.nodeType==3){
+        if(reg.test(node.nodeValue)){
+            var name=RegExp.$1;
+            name=name.trim();
+            node.nodeValue=vm[name];
+      
+            // new Watcher(vm,node,name);
+
+            if(WatcherList[name]==null||WatcherList[name]==undefined){
+                WatcherList[name]=[];
+                //node.nodeValue=vm[name];
+            } 
+            WatcherList[name].push(node);
+
+        }
+    }
+}
+
+
+
+function nodeToFragment(node,vm){
+    var fragment=document.createDocumentFragment();
+    var child;
+    while(child=node.firstChild){
+        compile(child,vm);
+        fragment.appendChild(child);
+    }
+    return fragment;
+}
+
+function Vue(options){
+    this.data=options.data;
+
+    var data=this.data;
+
+    observe(data,this);
+
+    var id=options.el;
+    var dom=nodeToFragment(document.getElementById(id),this);
+    document.getElementById(id).appendChild(dom);
+}
+
+
+var vm=new Vue({
+    el:'app',
+    data:{
+        text:'hello world'
+    }
+});
+
+
+</script>
+
