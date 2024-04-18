@@ -54,7 +54,7 @@ WatcherList.notice=function(key,newvalue){
     }     
 }
 
-/*compile 将节点和数据属性对应上*/
+/*compile 将节点和数据属性对应上，并获取所有观察者*/
 function compile(node,vm){
     
     if(node.nodeType==1){
